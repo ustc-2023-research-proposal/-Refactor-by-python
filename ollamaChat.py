@@ -1,5 +1,5 @@
 import ollama
-
+import json
 # python 为 ollama 提供了一个非常便捷的库
 # 看了一下应该只是将ollama进行了打包操作,放置在python内进行使用的一个库
 # 其中似乎并不能设置ollama的baseurl
@@ -16,7 +16,7 @@ class OllamaRequestOptions:
 	# https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values
 	def __init__(self) -> None:
 		self.dict = {
-		"num_keep": 5,
+		# "num_keep": 2,
 		# "seed": 42,
 		# "num_predict": 100, # 限制预测量, 我也不清楚这个应该怎么设置了 
 		# "top_k": 20,
@@ -33,10 +33,10 @@ class OllamaRequestOptions:
 		# "mirostat_eta": 0.6,
 		# "penalize_newline": True,
 		"stop": ["user:"],
-		"numa": False,
-		"num_ctx": 32768, # 默认记忆大小
-		"num_batch": 2,
-		"num_gqa": 1,
+		# "numa": False,
+		"num_ctx": 16384, # 默认记忆大小
+		# "num_batch": 2,
+		# "num_gqa": 1,
 		# "num_gpu": 1,
 		# "main_gpu": 0,
 		# "low_vram": False,
@@ -96,17 +96,29 @@ class OllamaMessages:
 		return self.messages
 
 
-def creatOllamaRequest(messages:OllamaMessages, options:OllamaRequestOptions, model='llama2') -> str:
+def creatOllamaRequest(messages:OllamaMessages, options:OllamaRequestOptions, model='llama2', isjson=False) :
 	"""
 	向ollama请求返回
 	messages : 为一个列表,含有 'role','content'等属性
 	options : 包含对于该请求的设置,如stop, maxtoken
 	model : 默认使用llama2:7b来进行生成
 	"""
+	# 
 	response = ollama.chat(model, messages.tolist(), stream=False, options=options.todict())
 	# print(response['message']['content'])
-	return response['message']['content']
+	if isjson == True:
+		ret = json.loads(ret)
+		print(ret)
+	ret = response['message']['content']
 
+	return ret
+
+if __name__ == '__main__':
+
+	message = OllamaMessages("why is the sky blue?")
+	option = OllamaRequestOptions()
+	ret = creatOllamaRequest(message, option)
+	print(ret)
 
 """
 Ollama的返回格式

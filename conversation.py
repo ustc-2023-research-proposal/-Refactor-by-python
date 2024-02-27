@@ -1,15 +1,38 @@
 from ollamaChat import creatOllamaRequest, OllamaRequestOptions, OllamaMessages
 from agent import *
+import random
+
+class Invition:
+    def __init__(self, agent:Agent, otheragent:Agent, time: float) -> None:
+        self.agent = agent
+        self.otheragent = otheragent
+        self.time = time
+    
+    def tryInvition(self) -> bool:
+        """
+        agent尝试发出邀请otheragent参与conversation中\n
+        返回一个bool值表示是否成功相应
+        """
+        ret = True
+        if self.agent.lastInviteAttempt == self.otheragent.name:
+            # 假如其为上一个谈话对象,则拒绝?
+            # 或者来减小对应的可能性会好一点?
+            # 或者不愿意接受相应的对话,对每一个用户而言.
+            ret = False
+        if random.random() < self.agent.invitePosiblity:
+            ret = False
+        return ret
+    
 
 
 class Conversation:
 
     agent : Agent # 对话发起人
     otheragent : Agent # 对话接收人
-    messages : list # 含有一个字典
+    messages : list[dict] # 含有一个字典
     time : float
-    maxNum = 3
-    maxTime = 120 # 先随便设置一下
+    maxConversationNum = 5
+    maxConversationTime = 20.0 # 先随便设置一下
 
     def __init__(self, agent:Agent, otheragent:Agent, time: float) -> None:
         self.agent = agent
@@ -17,6 +40,18 @@ class Conversation:
         self.messages = []
         self.time = time
     
+    def setMaxConversationNum(self, num: int) -> None:
+        """
+        设置最大对话数量
+        """
+        self.maxConversationNum = num
+
+    def setMaxConversationTime(self, time: float) -> None:
+        """
+        设置最长对话时间
+        """
+        self.maxConversationTime = time
+
     def beginConversation(self) -> None:
         """
         二者开始进行对话,其结果保存在self.messages中.
@@ -36,7 +71,7 @@ class Conversation:
         后续这个也许需要进行重构
         因为ai-town的写法非常奇怪
         """
-        return len(self.messages) > self.maxNum
+        return len(self.messages) > self.maxConversationNum
         
 
     def startConversationMessage(self, turn:bool = False) -> None:
@@ -48,7 +83,7 @@ class Conversation:
 
         prompt = f'You are {agent.name}, and you just started a conversation with {otheragent.name}.\n'
         prompt += self.agentPrompts(turn) + self.relatedMemoriesPrompt(turn) + agent.name + ':'
-
+        print(prompt)
         options = OllamaRequestOptions()
         options.addstop([f'{agent.name}:',f'{otheragent.name}:'])
         messages = OllamaMessages(prompt)
@@ -65,9 +100,10 @@ class Conversation:
 
         prompt = f'You are {agent.name}, and you are currently in a conversation with {otheragent.name}.\n'
         prompt += self.agentPrompts(turn) + self.relatedMemoriesPrompt(turn) 
-        prompt += f'Below is the current chat history between you and {otheragent.name}.\n DO NOT greet them again. Do NOT use the word "Hey" too often. Your response should be brief and within 200 characters.\n'
+        prompt += f'Below is the current chat history between you and {otheragent.name}.\n DO NOT greet them again. DO NOT repeat your said before. Do NOT use the word "Hey" too often. Your response should be brief and within 200 characters.\n'
         prompt += self.conversationToString()
 
+        print(prompt)
         options = OllamaRequestOptions()
         options.addstop([agent.name+':', otheragent.name+':'])
 
@@ -109,9 +145,9 @@ class Conversation:
         else:
             agent, otheragent = self.agent, self.otheragent
 
-        prompt = f'About you: ${agent.description}'
-        prompt += f'Your goals for the conversation: ${agent.plan}'
-        prompt += f'About ${otheragent.name}: ${otheragent.description}'
+        prompt = f'About you: {agent.description} \n '
+        prompt += f'Your goals for the conversation: {agent.plan}'
+        prompt += f'About {otheragent.name}: \n {otheragent.description}'
         prompt += '\n'
         return prompt
     
@@ -121,11 +157,11 @@ class Conversation:
         else:
             agent, otheragent = self.agent, self.otheragent
 
-        prompt = 'Memories:'
+        prompt = 'Memories: \n'
+        
         prompt += '\n'.join(agent.getMemoryAbout(otheragent.name, 3))
         # 读取otheragent相同的记忆
         # 以agent的视角来回忆
-        prompt += '\n'
         return prompt
 
     def addMessage(self, message:str, time:float, turn:bool = False, ) -> None:
@@ -157,6 +193,7 @@ class Conversation:
         ret = ''
         for message in self.messages:
             ret += message['agent'] + ':' + message['message'] + '\n'
+        ret += '\n'
         return ret
 
     def conversationToList(self) -> list[dict]:
@@ -170,14 +207,16 @@ class Conversation:
             agent, otheragent = self.otheragent, self.agent
         else:
             agent, otheragent = self.agent, self.otheragent
+
         conversation = {
-            'agent':self.agent,
+            'agent':agent.name,
             'time':self.time,
-            'otheragent':self.otheragent,
+            'otheragent':otheragent.name,
             'content':self.conversationToString(),
             'embedding':None,
         }
         return conversation
+
 
 if __name__ == '__main__':
     description = """
@@ -200,3 +239,7 @@ if __name__ == '__main__':
 
     createmessage = Conversation(agent1, agent2, time=0)
     createmessage.beginConversation()
+    # agent1.review()
+    agent1.saveData('./Localizaltion/data/')
+    agent2.saveData('./Localizaltion/data/')
+    agent1.review()
