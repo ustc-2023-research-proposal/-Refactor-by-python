@@ -1,12 +1,10 @@
 import ollama
-import json
+
 # python 为 ollama 提供了一个非常便捷的库
 # 看了一下应该只是将ollama进行了打包操作,放置在python内进行使用的一个库
 # 其中似乎并不能设置ollama的baseurl
 
-model = 'llama2' # 默认使用llama2来进行chatGenerate
 # messages:list, options, model='llama2'
-
 
 class OllamaRequestOptions:
 	"""
@@ -15,109 +13,108 @@ class OllamaRequestOptions:
 	"""
 	# https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values
 	def __init__(self) -> None:
-		self.dict = {
+		self.options = {
 		# "num_keep": 2,
-		# "seed": 42,
 		# "num_predict": 100, # 限制预测量, 我也不清楚这个应该怎么设置了 
-		# "top_k": 20,
+		# "top_k": 40, # 生成更多样化的答案?
 		# "top_p": 0.9,
-		# "tfs_z": 0.5,
-		# "typical_p": 0.7,
-		# "repeat_last_n": 33,
+		# "tfs_z":1,
+		# "repeat_last_n": 64,
 		# "temperature": 0.8,
-		# "repeat_penalty": 1.2,
-		# "presence_penalty": 1.5,
-		# "frequency_penalty": 1.0,
-		# "mirostat": 1,
-		# "mirostat_tau": 0.8,
-		# "mirostat_eta": 0.6,
-		# "penalize_newline": True,
+		# "repeat_penalty": 1.1, # 重复惩罚 
+		# "mirostat": 0,
+		# "mirostat_tau": 5.0,
+		# "mirostat_eta": 0.1,
 		"stop": ["user:"],
-		# "numa": False,
-		"num_ctx": 16384, # 默认记忆大小
-		# "num_batch": 2,
-		# "num_gqa": 1,
-		# "num_gpu": 1,
-		# "main_gpu": 0,
-		# "low_vram": False,
-		# "f16_kv": True,
-		# "vocab_only": False,
-		# "use_mmap": True,
-		# "use_mlock": False,
-		# "embedding_only": False,
-		# "rope_frequency_base": 1.1,
-		# "rope_frequency_scale": 0.8,
-		# "num_thread": 8
+		"num_ctx": 2048, # 默认记忆大小
 		}
 
-	def todict(self) -> dict:
+	def toDict(self) -> dict:
 		"""
 		获得一个默认的options类
 		"""
-		return self.dict
+		return self.options
 	
-	def addstop(self, stop:list[str]) -> dict:
+	def setStopWord(self, stopWord:list[str]) -> None:
 		"""
-		添加一个stop参数到options中
+		添加一组stop参数到options中
 		"""
-		for word in stop:
-			self.dict['stop'].append(word)
-		return self.dict
-	
-	def replacestop(self, stop:list[str]) -> dict:
-		"""
-		替换掉stop中的所有参数
-		"""
-		self.dict['stop'] = stop
-		return self.dict
-	
-	def setMaxToken(self, num:int) -> None:
-		self.dict['num_predict'] = num
+		for word in stopWord:
+			self.options['stop'].append(word)
+
+	def setOptions(self, top_k=40, top_p=0.9, tfs_z=1, repeat_last_n=64,
+				temperature=0.8,repeat_penalty=1.1,mirostat=0,mirostat_tau=5.0,
+				mirostat_eta = 0.1,num_predict=128, ):
+		self.options['top_k'] = top_k
+		self.options['top_p'] = top_p
+		self.options['tfs_z'] = tfs_z
+		self.options['repeat_last_n'] = repeat_last_n
+		self.options['temperature'] = temperature
+		self.options['repeat_penalty'] = repeat_penalty
+		self.options['mirostat'] = mirostat
+		self.options['mirostat_tau'] = mirostat_tau
+		self.options['mirostat_eta'] = mirostat_eta
+		self.options['num_predict'] = num_predict
+		return self
 
 class OllamaMessages:
 	"""
 	创建一个messages类便于之后使用
 	"""
-	def __init__(self, prompt:str) -> None:
-		self.messages = [
-			{
+	def __init__(self, prompts:list[str]) -> None:
+		self.messages = []
+		for prompt in prompts:
+			self.messages.append({
 				'role':'user',
 				'content': prompt,
-			}
-		]
+			})
 	
-	def append(self, message:str) -> None:
-		self.messages.append({
-			'role':'user',
-			'content': message,
-		})
-
-	def tolist(self) -> list:
+	def toList(self) -> list:
 		return self.messages
+	
+	
+class Prompt:
+	
+	prompt:list[str]
 
+	def __init__(self, content:list[str]=[]) -> None:
+		self.prompt = content
 
-def creatOllamaRequest(messages:OllamaMessages, options:OllamaRequestOptions, model='llama2', isjson=False) :
+	def append(self, content:list[str]) -> None:
+		self.prompt += content
+
+	def join(self, char:str='\n') -> str:
+		return char.join(self.prompt)
+	
+	def __add__(self, prompt):
+		self.prompt.append(prompt)
+		return self
+
+	def __iadd__(self, prompt):
+		self.prompt.append(prompt)
+		return self
+	def __str__(self) -> str:
+		return self.join()
+	
+
+def createOllamaRequest(messages:OllamaMessages, options:OllamaRequestOptions, model='llama2') :
+
 	"""
 	向ollama请求返回
 	messages : 为一个列表,含有 'role','content'等属性
 	options : 包含对于该请求的设置,如stop, maxtoken
 	model : 默认使用llama2:7b来进行生成
 	"""
-	# 
-	response = ollama.chat(model, messages.tolist(), stream=False, options=options.todict())
-	# print(response['message']['content'])
-	if isjson == True:
-		ret = json.loads(ret)
-		print(ret)
+	response = ollama.chat(model, messages.toList(), stream=False, options=options.toDict())
 	ret = response['message']['content']
-
+	print(ret)
 	return ret
 
 if __name__ == '__main__':
 
-	message = OllamaMessages("why is the sky blue?")
+	message = OllamaMessages(["why is the sky blue?"])
 	option = OllamaRequestOptions()
-	ret = creatOllamaRequest(message, option)
+	ret = createOllamaRequest(message, option)
 	print(ret)
 
 """

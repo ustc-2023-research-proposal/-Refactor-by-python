@@ -1,12 +1,16 @@
-from ollamaChat import creatOllamaRequest, OllamaRequestOptions, OllamaMessages
-from agent import *
+from ollamaChat import Prompt, createOllamaRequest, OllamaRequestOptions, OllamaMessages
+from agent import Agent, Agentloaction
+import numpy as np
 import random
+import time
+import pandas as pd
+import os
 
 class Invition:
-    def __init__(self, agent:Agent, otheragent:Agent, time: float) -> None:
+    def __init__(self, agent:Agent, otheragent:Agent) -> None:
         self.agent = agent
         self.otheragent = otheragent
-        self.time = time
+        self.time = time.time()
     
     def tryInvition(self) -> bool:
         """
@@ -22,200 +26,239 @@ class Invition:
         if random.random() < self.agent.invitePosiblity:
             ret = False
         return ret
+
+
+class ConversationMessage:
+    def __init__(self, sender:Agent, recipient:Agent, chatHistory:str,
+                options:OllamaRequestOptions) -> None:
+        self.sender = sender
+        self.recipient = recipient
+        self.message = None
+        self.chatHistory = chatHistory
+        self.prompts = []
+        self.options = options
+        self.stopConversation:bool
+
+    def createMessage(self) -> dict:
+        ollamaMessages = OllamaMessages(self.prompts)
+        message = createOllamaRequest(ollamaMessages, self.options)
+        self.message = message
+        return self.toDict()
+    
+    def relatedPrompt(self) -> str:
+        ret = Prompt([
+            self.agentPrompt(),
+            self.memoryPrompt(),
+        ]).join()
+        return ret
+
+    def agentPrompt(self) -> str:
+        ret = Prompt([
+            f'Your description: {self.sender.description}',
+            f'Your plan in this conversation: {self.sender.plan}',
+            f'About your recipient: {self.recipient.description}',
+        ]).join()
+        return ret
+
+    def memoryPrompt(self) -> str:
+        if self.chatHistory != '':
+            memory = self.sender.getMemoryAbout(3, self.chatHistory)
+            if len(memory) != 0:
+                ret = Prompt([
+                    f'Your memory about {self.recipient.name}:',
+                    Prompt(memory).join(),
+                ]).join()
+            else:
+                ret = ''
+        else:
+            ret = ''
+        return ret
+        
+    def __str__(self) -> str:
+        if self.message == None:
+            print("message is not created")
+        return self.sender.name + ' to '+ self.recipient.name + ': ' + self.message
+    
+    def toDict(self) -> dict:
+        ret = {
+            'sender': self.sender.name,
+            'recipient': self.recipient.name,
+            'message': self.message,
+            'time': time.time(),
+        }
+        return ret
+
+    def isStopConversation(self) -> bool:
+        prompt = Prompt([
+            f"You are {self.sender.name}, now you are chatting with {self.recipient}.",
+            self.relatedPrompt(),
+            "Do you want to end this conversation?",
+            "Your answer must be 'Y' or 'N', And only have one character. e.g: \"Y\"",
+            f"Below is the conversation history with {self.recipient.name}:",
+        ]).join()
+        ollamaMessages = OllamaMessages([prompt, self.chatHistory,'You:'])
+        options = OllamaRequestOptions().setOptions(num_predict=1,temperature=0.7,top_k=20,top_p=0.7)
+        ret = createOllamaRequest(ollamaMessages,options)
+        return ret != 'Y'
+    
+    def update(self, chatHistory:str):
+        self.chatHistory = chatHistory
+        self.sender, self.recipient = self.recipient, self.sender
+        return self
+
+
+
+
+# 三种ConversationMessages有着相似的定义,类似的方法
+
+class StartConversationMessage(ConversationMessage):
+    def __init__(self, sender:Agent, recipient:Agent, chatHistory:str,
+                options:OllamaRequestOptions) -> None:
+        super().__init__(sender, recipient, chatHistory, options)
+        prompt = Prompt([
+            f'You are {sender.name}, and you just started a conversation with {recipient.name}.',
+            self.agentPrompt()
+        ])
+
+        self.prompts = [prompt.join(), self.sender.name+':']
+
+
+class ContinueConversationMessage(ConversationMessage):
+    def __init__(self, sender: Agent, recipient: Agent, chatHistory:str,
+                 options: OllamaRequestOptions) -> None:
+        super().__init__(sender, recipient, chatHistory, options)
+        prompt = Prompt([
+            f'You are {sender.name}, and you are currently in a conversation with {recipient.name}.',
+            self.relatedPrompt(),
+            f'Below is the current chat history between you and {recipient.name}.\n DO NOT greet them again. DO NOT repeat your said before. Do NOT use the word "Hey" too often. Your response should be brief and within 200 characters.',            
+        ])
+        self.prompts = [
+            prompt.join(), 
+            self.chatHistory,
+            self.sender.name+':'
+        ]
+    
     
 
+class EndConversationMessage(ConversationMessage):
+    def __init__(self, sender:Agent, recipient:Agent, chatHistory:str, 
+                 options:OllamaRequestOptions) -> None:
+        super().__init__(sender, recipient, chatHistory, options)
+        prompt = Prompt([
+            f"You are {sender.name}, and you're currently in a conversation with {recipient.name}.",
+            "You've decided to leave the question and would like to politely tell them you're leaving the conversation.",
+            self.agentPrompt(),
+            f"Below is the current chat history between you and {recipient.name}.",
+            f"How would you like to tell them that you're leaving? Your response should be brief and within 200 characters.",
+        ])
+        self.prompts = [
+            prompt.join(),
+            chatHistory,
+            sender.name+':',
+        ]
+
+# 集成一个总类型
 
 class Conversation:
 
     agent : Agent # 对话发起人
-    otheragent : Agent # 对话接收人
+    otheragent : Agent # 对话另一个
     messages : list[dict] # 含有一个字典
-    time : float
-    maxConversationNum = 5
-    maxConversationTime = 20.0 # 先随便设置一下
+    maxConversationNum = 8
+    maxConversationTime = 2000.0 # 先随便设置一下
+    ollamaRequestOptions = OllamaRequestOptions().setOptions(temperature=0.9,repeat_penalty=1.5,top_p=0.95,top_k=100)
 
-    def __init__(self, agent:Agent, otheragent:Agent, time: float) -> None:
+    def __init__(self, agent:Agent, otheragent:Agent) -> None:
         self.agent = agent
         self.otheragent = otheragent
         self.messages = []
-        self.time = time
-    
-    def setMaxConversationNum(self, num: int) -> None:
-        """
-        设置最大对话数量
-        """
-        self.maxConversationNum = num
+        self.time = time.time()
+        self.ollamaRequestOptions.setStopWord([f'{agent.name}:',f'{otheragent.name}:'])
 
-    def setMaxConversationTime(self, time: float) -> None:
-        """
-        设置最长对话时间
-        """
-        self.maxConversationTime = time
-
-    def beginConversation(self) -> None:
+    def stepConversation(self) -> None:
         """
         二者开始进行对话,其结果保存在self.messages中.
         """
-        self.startConversationMessage(turn=False)
-        turn = True
-        while not self.isStopConversation():
-            self.continueConversationMessage(turn=turn)
-            turn = not turn
-        self.leaveConversationMessage(turn)
 
+        endConversation = False
 
-    def isStopConversation(self) -> bool:
-        """
-        会返回一个bool值
-        表示当前状态下是否应该leaveConversation
-        后续这个也许需要进行重构
-        因为ai-town的写法非常奇怪
-        """
-        return len(self.messages) > self.maxConversationNum
+        startConversationMessage = StartConversationMessage(
+            self.agent,
+            self.otheragent,
+            self.toFormattedString(),
+            self.ollamaRequestOptions,
+            )
+        self.pushMessage(startConversationMessage.createMessage())
+
+        continueConversationMessage = ContinueConversationMessage(
+            self.otheragent,
+            self.agent,
+            self.toFormattedString(),
+            self.ollamaRequestOptions,
+        )
+
+        self.pushMessage(continueConversationMessage.createMessage())
         
+        def isEndConversation() -> bool:
+            j1 = len(self.messages) > self.maxConversationNum
+            j2 = (time.time() - self.time) > self.maxConversationTime
+            return j1 or j2
 
-    def startConversationMessage(self, turn:bool = False) -> None:
+        while not endConversation :
+            continueConversationMessage.update(self.toFormattedString())
+            self.pushMessage(continueConversationMessage.createMessage())
+            endConversation = isEndConversation() or continueConversationMessage.isStopConversation()
 
-        if turn:
-            agent, otheragent = self.otheragent, self.agent
-        else:
-            agent, otheragent = self.agent, self.otheragent
+        endConversationMessage = EndConversationMessage(
+            continueConversationMessage.recipient,
+            continueConversationMessage.sender,
+            self.toFormattedString(),
+            self.ollamaRequestOptions,
+        )
+        self.pushMessage(endConversationMessage.createMessage())
+        endConversationMessage.update(self.toFormattedString())
+        self.pushMessage(endConversationMessage.createMessage())
 
-        prompt = f'You are {agent.name}, and you just started a conversation with {otheragent.name}.\n'
-        prompt += self.agentPrompts(turn) + self.relatedMemoriesPrompt(turn) + agent.name + ':'
-        print(prompt)
-        options = OllamaRequestOptions()
-        options.addstop([f'{agent.name}:',f'{otheragent.name}:'])
-        messages = OllamaMessages(prompt)
+        conversationForAgent, conversationForOtherAgent = self.toDict()
 
-        self.addMessage(creatOllamaRequest(messages, options), self.time, turn)
+        self.agent.rememberConversation(conversationForAgent)
+        self.otheragent.rememberConversation(conversationForOtherAgent)            
 
-
-    def continueConversationMessage(self, turn:bool = False) -> None:
-
-        if turn:
-            agent, otheragent = self.otheragent, self.agent
-        else:
-            agent, otheragent = self.agent, self.otheragent
-
-        prompt = f'You are {agent.name}, and you are currently in a conversation with {otheragent.name}.\n'
-        prompt += self.agentPrompts(turn) + self.relatedMemoriesPrompt(turn) 
-        prompt += f'Below is the current chat history between you and {otheragent.name}.\n DO NOT greet them again. DO NOT repeat your said before. Do NOT use the word "Hey" too often. Your response should be brief and within 200 characters.\n'
-        prompt += self.conversationToString()
-
-        print(prompt)
-        options = OllamaRequestOptions()
-        options.addstop([agent.name+':', otheragent.name+':'])
-
-        messages = OllamaMessages(prompt)
-        messages.append(agent.name + ':')
-
-        self.addMessage(creatOllamaRequest(messages, options), self.time, turn)
-
-    def leaveConversationMessage(self, turn:bool = False) -> None:
-        if turn:
-            agent, otheragent = self.otheragent, self.agent
-        else:
-            agent, otheragent = self.agent, self.otheragent
-        
-        prompt = f"You are {agent.name}, and you're currently in a conversation with {otheragent.name}.\n"
-        prompt += "You've decided to leave the question and would like to politely tell them you're leaving the conversation.\n"
-        prompt += self.agentPrompts(turn)
-        prompt += f"Below is the current chat history between you and {otheragent.name}.\n"
-        prompt += f"How would you like to tell them that you're leaving? Your response should be brief and within 200 characters.\n"
-        prompt += self.conversationToString()
-
-        options = OllamaRequestOptions()
-        options.addstop([agent.name+':', otheragent.name+':'])
-
-        messages = OllamaMessages(prompt)
-        messages.append(agent.name + ':')
-
-        self.addMessage(creatOllamaRequest(messages, options), self.time, turn)
-
-        self.agent.rememberConversation(self.conversationToDict())
-        self.otheragent.rememberConversation(self.conversationToDict(turn=True))
-
-    def agentPrompts(self, turn:bool=False) -> str:
-        """
-        获得关于对话生成的prompt.
-        """
-        if turn:
-            agent, otheragent = self.otheragent, self.agent
-        else:
-            agent, otheragent = self.agent, self.otheragent
-
-        prompt = f'About you: {agent.description} \n '
-        prompt += f'Your goals for the conversation: {agent.plan}'
-        prompt += f'About {otheragent.name}: \n {otheragent.description}'
-        prompt += '\n'
-        return prompt
-    
-    def relatedMemoriesPrompt(self, turn:bool = False) -> str:
-        if turn:
-            agent, otheragent = self.otheragent, self.agent
-        else:
-            agent, otheragent = self.agent, self.otheragent
-
-        prompt = 'Memories: \n'
-        
-        prompt += '\n'.join(agent.getMemoryAbout(otheragent.name, 3))
-        # 读取otheragent相同的记忆
-        # 以agent的视角来回忆
-        return prompt
-
-    def addMessage(self, message:str, time:float, turn:bool = False, ) -> None:
-        """
-        添加message,
-        turn = true 表明两者身份对调
-        为otheragent对agent的回答
-        反之则为 agent 对 otheragent
-        """
-        if turn:
-            agent, otheragent = self.otheragent, self.agent
-        else:
-            agent, otheragent = self.agent, self.otheragent
-
-        message = {
-            'time':time,
-            'agent':agent.name,
-            'otheragent':otheragent.name,
-            'message':message,
-            }
+    def pushMessage(self, message:dict) -> None:
         self.messages.append(message)
-        print(message['agent'] + ':' + message['message'] + '\n')
-
     
-    def conversationToString(self) -> str:
-        """
-        将conversation的内容转换为str用于prompt输入
-        """
-        ret = ''
-        for message in self.messages:
-            ret += message['agent'] + ':' + message['message'] + '\n'
-        ret += '\n'
+    def toFormattedString(self) -> str:
+        if len(self.messages) != 0:
+            ret = []
+            for message in self.messages:
+                ret.append(f"{message['sender']} to {message['recipient']}: {message['message']}")
+            ret = '\n'.join(ret)
+        else: 
+            ret = ''
         return ret
-
-    def conversationToList(self) -> list[dict]:
-        """
-        将conversation以list[dict]的形式来返回
-        """
-        return self.messages
     
-    def conversationToDict(self, turn:bool=False) -> dict:
-        if turn:
-            agent, otheragent = self.otheragent, self.agent
-        else:
-            agent, otheragent = self.agent, self.otheragent
-
-        conversation = {
-            'agent':agent.name,
-            'time':self.time,
-            'otheragent':otheragent.name,
-            'content':self.conversationToString(),
-            'embedding':None,
+    def toDict(self):
+        conversationForAgent = {
+            'agent':self.agent.name,
+            'otheragent':self.otheragent.name,
+            'content':self.messages,
         }
-        return conversation
+        conversationForOtherAgent = {
+            'agent':self.otheragent.name,
+            'otheragent':self.agent.name,
+            'content':self.messages,
+        }
+        return conversationForAgent, conversationForOtherAgent
+
+    def save(self) -> None:
+        path = '/home/tenghao/Localizaltion/data/'
+        existedData = pd.read_csv(path + "messages.csv",index_col=0)
+        df = pd.DataFrame(self.messages)
+        pd.concat(existedData, df, ignore_index=True)
+        existedData.to_csv(path + "messages.csv")
+
+    def __del__(self) -> None:
+        self.save()
 
 
 if __name__ == '__main__':

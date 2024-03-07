@@ -1,7 +1,9 @@
 import pandas as pd
-from ollamaChat import creatOllamaRequest, OllamaRequestOptions, OllamaMessages
-import embedder
-import json
+from ollamaChat import Prompt, createOllamaRequest, OllamaRequestOptions, OllamaMessages
+from embedder import Embedder
+import numpy as np
+import ast
+import time # time.asctime() 返回一个当前时间戳
 
 
 class Agentloaction:
@@ -23,7 +25,7 @@ class Agent:
     description : str
     plan : str
     memories: pd.DataFrame
-    conversations : pd.DataFrame
+    conversations : list[dict] # 设置最大限额量,并且一旦超过量就写入文件中
     location : Agentloaction
     lastInviteAttempt : str # 上一次尝试邀请的agent的姓名
     invitePosiblity : float # 表明其接受invite的可能性大小
@@ -44,83 +46,88 @@ class Agent:
         self.name = name
         self.description = description
         self.plan = plan
-        self.memories = pd.DataFrame(columns=['agent','time','otheragent','content','embedding','type','importance'])
-        self.allmemories = pd.DataFrame(columns=['agent','time','otheragent','content','embedding','type','importance'])
-        self.conversations = pd.DataFrame(columns=['agent','time','otheragent','content','embedding'])
+        self.memories = pd.DataFrame(columns=['agent','time','content','type','importance','embedding'])
+        self.conversations = []
         self.location = location
         self.invitePosiblity = 0.8 # 这个可能是需要随着进程变动的
 
        
     def rememberConversation(self, conversation:dict) -> None:
         # 将conversation加入到conversation数据库中
-        self.conversations.loc[len(self.conversations)] = [ conversation['agent'],
-                                                            conversation['time'],
-                                                            conversation['otheragent'],
-                                                            conversation['content'],
-                                                            conversation['embedding'],
-                                                            ]
+        
+        def getConversationContent(conversation:dict) -> str:
+            ret = []
+            massages = conversation['content']
+            for massage in massages:
+                ret.append(massage['sender']+' to '+massage['recipient']+': '+massage['message'])
+            return '\n'.join(ret)
         
         # 将conversation进行summary后进行remember操作
-        prompt = f"""You are {conversation['agent']}, and you just finished a conversation with {conversation['otheragent']}. I would
+        prompt = Prompt([
+        f"""You are {conversation['agent']}, and you just finished a conversation with {conversation['otheragent']}. I would
             like you to summarize the conversation from {conversation['agent']}'s perspective, using first-person pronouns like
-            "I," and add if you liked or disliked this interaction. \n"""
-        prompt += conversation['content']
+            "I," and add if you liked or disliked this interaction.""",
+            getConversationContent(conversation) 
+        ])
+    
         options = OllamaRequestOptions()
-        messages = OllamaMessages(prompt)
+        messages = OllamaMessages([prompt.join(), self.name+':'])
 
-        messages.append(self.name+':')
-        memory = creatOllamaRequest(messages, options)
-        embedding = embedder.embeddingForOne(memory).tolist()
+        memory = createOllamaRequest(messages, options)
+        embedding = Embedder.embeddingForOne(Embedder.model, memory)
         importance = self.calculateImportance(memory)
 
-        # 'agent','time','otherAgent','content','embedding','type','importance'
-        self.memories.loc[len(self.memories)] = [conversation['agent'],
-                                                 conversation['time'],
-                                                 conversation['otheragent'],
-                                                 memory,
-                                                 embedding,
-                                                 'memory',
-                                                 importance,]
-        
-        self.allmemories.loc[len(self.memories)] = [conversation['agent'],
-                                                 conversation['time'],
-                                                 conversation['otheragent'],
-                                                 memory,
-                                                 embedding,
-                                                 'memory',
-                                                 importance,]
-    
-    def sortMemory(self) -> None:
+        self.memories.loc[len(self.memories)] = [
+            conversation['agent'],
+            time.time(),
+            memory,
+            'memory',
+            importance,
+            embedding,
+        ]
+
+
+    def sortMemory(self, conversationEmbedding) -> None:
         """
         按照importance对memory进行降序排序
         """
-        self.memories.sort_values(by='importance', ascending=False, inplace=True)
+        # 需要继续修正 / 对于时间项
+        revelence = self.memories['time'].to_list()
+        revelence = [np.e**(i-time.time()) for i in revelence]
 
-    def getMemory(self, num:int) -> list[str]:
-        """
-        从memory中获得最近几条比较重要的memory
-        """
-        self.sortMemory()
-        ret = self.memories['content'].head(num).to_list()
-        return ret
+        importance = self.memories['importance'].to_list()
+        importance = [int(i) for i in importance]
+
+        memoryEmbedding = self.memories['embedding'].to_list()
+        memoryEmbedding = [ast.literal_eval(i) for i in memoryEmbedding]
+        
+        similarity = Embedder.caculateSimilarity(memoryEmbedding,conversationEmbedding)
+        
+        score = [i+j+z for i,j,z in zip(importance,similarity,revelence)]
+        self.memories['score'] = score
+
+        self.memories.sort_values(by='score', ascending=False, inplace=True)
+
+        
     
     def forgetMemory(self, max:int) -> None:
         """
         超过max num的记忆会被遗忘,所有记忆存储在allmemories里面
         """
-        self.sortMemory()
+        self.memories.sort_values(by='score', ascending=False, inplace=True)
         self.memories = self.memories.head(max)
 
-
-    def getMemoryAbout(self, name:str, num:int) -> list[str]:
+    def getMemoryAbout(self, num:int, chatHistory:str) -> list[str]:
         """
-        获得关于某人的记忆:
-        name: otheragent的姓名
+        num: num of requiring
+        chatHistory: str instead of list[str].
         """
-        # 个人认为About不如是直接增加importance的值,然后从最大中选择出前max个
-        self.sortMemory()
-        memories = self.memories[self.memories['otheragent'] == name]
-        ret = memories['content'].head(num).to_list()
+        if len(self.memories.index) == 0:
+            ret = []
+        else: 
+            conversationEmbedding = Embedder.embeddingForOne(Embedder.model,chatHistory)
+            self.sortMemory(conversationEmbedding)
+            ret = self.memories.head(num)['content'].to_list()
         return ret
 
     def calculateImportance(self, memory:str) -> str:
@@ -130,42 +137,51 @@ class Agent:
 
         options = OllamaRequestOptions()
         # 设置其最大输出数量为1
-        options.setMaxToken(1)
-
+        options.setOptions(num_predict=1, temperature=0.7)
         messages = OllamaMessages(prompt)
 
         # 目前暂时以str的形式来进行存储
-        importance = creatOllamaRequest(messages, options)
+        importance = createOllamaRequest(messages, options)
         return importance
-    
 
-    def review(self) -> None:
-        """
-        agent进行review. \n
-        以json形式来返回信息
-        """
-        prompt = ['[no prose]', '[Output only JSON]', f'You are {self.name}, statements about you:']
-        memories = self.memories['content'].to_list()
-        for memory in memories:
-            prompt.append('Statement:' + memory)
-        prompt.append("What 3 high-level insights can you infer from the above statements?")
-        # 这里需要以python的json格式来进行返回结果.
-        prompt.append("""Return in JSON format, where the key is a list of input statements that contributed to your insights and value is your insight. Make the response parseable by Python json.loads(). DO NOT escape characters or include "\n" or white space in response.""")
-        # 首先对于返回结果还是先进行尝试后再观察其返回结果.
-        options = OllamaRequestOptions()
-        message = OllamaMessages(prompt)
-        reflact = creatOllamaRequest(message, options, isjson=True)
-        print(reflact)
-        return reflact
 
-    def doSomething(self) -> None:
+    def review(self, lastrespond:list[str]= None) -> None:
+        prompt = Prompt([
+            f"You are {self.name}.",
+            f"Your decription: {self.description}",
+            f"Your plan: {self.plan}",
+            "Below is your memories, what can you infer from your memories. Please use 'I' in your respond. Your repond should be brief and in 100 charaters.",
+            f"Memories: {self.memories}",
+        ])
+
+        if len(lastrespond) != 0:
+            prompt += "Do not be similiy with it in your respond.You need to respond the defferent answer."
+            for respond in lastrespond:
+                prompt += respond
+
+        ollamaMessages = OllamaMessages([prompt.join(),"Inference:"])
+        options = OllamaRequestOptions().setOptions(temperature=0.7,top_k=40)
+        respond = createOllamaRequest(ollamaMessages, options)
+
+        embedding = Embedder.embeddingForOne(Embedder.model,respond)
+
+        self.memories.iloc[len(self.memories)] = [
+            self.name,
+            time.time(),
+            None,
+            respond,
+            embedding,
+        ]
+
+
+    def doSomethingElse(self) -> None:
         """
         假如所有对话邀请都被拒绝,并且在一轮conversation运行结束后无事可做\n
         此时会执行这个函数\n
         向ollama输入一个当前状态,然后返回一个agent想进行的动作.
         """
     
-    def saveData(self,path:str) -> None:
+    def saveData(self, path:str) -> None:
         """
         将conversations, allmemories的内容保存至data目录下.\n
         确保path路径为str,并且以'/'结尾
@@ -183,8 +199,6 @@ class Agent:
         self.memories = pd.read_csv(path + f'[{self.name}][memories].csv', index_col=0)
         self.allmemories = pd.read_csv(path + f'[{self.name}][allmemories].csv', index_col=0)
     
-
-
 
 
 

@@ -3,7 +3,24 @@ from agent import *
 import json
 
 class Config:
-    datapath = 'data/'
+    # Data Structure
+    """
+    - data
+        - world
+            - conversation
+            - memory
+        - agent  
+    """
+    datapath = '/home/tenghao/Localizaltion/data/'
+
+
+    maxConversationNum : int = 5
+    maxConversationTime : float = 2000
+
+    inferanceModel : str = 'llama2:7b'
+    invitePossibility : float = 0.8
+
+    maxMemoryNum : int = 10
 
     def __init__(self) -> None:
         pass
@@ -13,37 +30,38 @@ class Config:
      
 
 class Load:
-    dataPath = "data/"
 
-    def loadAgent(self) -> list[Agent]:
+    def loadAgent() -> list[Agent]:
         """
         从datapath中读取初始化数据\n
         以用于生成所有agent
         返回一个拥有agent的list
         """
-        path = self.dataPath + 'agentDescription.csv'
+        path = Config.datapath + 'Agents.csv'
         df = pd.read_csv(path, index_col=0)
         agents = []
         for i in range(len(df.index)):
             location = Agentloaction(x=0, y=0)
-            agent = Agent(df.iloc[i]['name'], df.iloc[i]['description'], df.iloc[i]['plan'], location)
+            agent = Agent(df.iloc[i]['name'], df.iloc[i]['description'], df.iloc[i]['plan'],location)
             agents.append(agent)
         print(f"Successful to load and Init {len(df.index)} Agents.")
         return agents
 
-    def loadAgentData(self, agents:list[Agent]) -> None:
+    def loadAgentData(agents:list[Agent]) -> None:
         """
         从data/csv中读取所有conversations以及memories
         agents: 一个list,包含所有agent
         """
         for agent in agents:
-            agent.loadData(path=self.dataPath)
+            agent.loadData(path=Config.datapath)
 
-    def loadWorld(self) -> None:
-        """
-        从世界文件中load世界
-        """
-        pass
+    def loadWorld() -> None:
+        return pd.read_pickle(Config.datapath)
+
+    def loadConfig(self, path:str) -> Config:
+        config = pd.read_json(path)
+        return config
+
 
 class Save:
     datapath = "data/"
@@ -55,6 +73,11 @@ class Save:
         for agent in agents:
             agent.saveData(path=self.datapath)
 
-    def saveWorld(self) -> None:
-        pass
+    def saveWorld(self, world) -> None:
+        """
+        将世界保存为plk
+        """
+        pd.to_pickle(world, self.datapath + f"{world.worldName}.pkl")
 
+    def saveConfig(self, config:Config, path:str) -> None:
+        pass
