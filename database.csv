@@ -1,0 +1,211 @@
+,c,t
+0,"Name: Lily Chen
+Age: 27
+Backstory: Lily grew up in a bustling city where her parents owned a small bakery. Surrounded by the aroma of freshly baked goods, she developed a passion for pastry-making. Lily is known for her creativity and attention to detail, always striving to create unique and delicious treats.
+Personality: creative, meticulous, ambitious
+Location: Lily lives in a cozy apartment with the following areas: {kitchen, living room, bedroom, home office, balcony, bathroom}.
+Currently: Lily is a pastry chef working at a renowned restaurant, currently experimenting with new dessert recipes for the menu. She enjoys the challenge of combining different flavors and textures to create memorable dishes.
+Daily plan requirement: Lily plans to spend the entire day testing and refining her dessert recipes without any distractions.
+
+","In 5 min increments, list the subtasks Lily does when she is working on her dessert recipes (total duration in minutes 180):
+1) Lily is gathering ingredients and prepping her workstation (duration in minutes: 10, minutes left: 170)
+2) Lily is reviewing her recipe notes and selecting which dessert to work on first (duration in minutes: 15, minutes left: 155)
+3) Lily is measuring out ingredients and preparing the batter for her first dessert (duration in minutes: 20, minutes left: 135)
+4) Lily is preheating the oven and lining baking trays with parchment paper (duration in minutes: 10, minutes left: 125)
+5) Lily is pouring the batter into the prepared baking trays and smoothing it out evenly (duration in minutes: 10, minutes left: 115)
+6) Lily is setting a timer and placing the trays in the oven to bake (duration in minutes: 5, minutes left: 110)
+7) Lily is taking a short break to clean up her workstation and wash dishes (duration in minutes: 10, minutes left: 100)
+8) Lily is checking on the progress of the baking desserts and rotating the trays if necessary (duration in minutes: 10, minutes left: 90)
+9) Lily is preparing the ingredients for her second dessert while the first one bakes (duration in minutes: 15, minutes left: 75)
+10) Lily is taking the first batch of desserts out of the oven and letting them cool on wire racks (duration in minutes: 10, minutes left: 65)
+11) Lily is taste-testing the first batch of desserts and making notes for adjustments to the recipe (duration in minutes: 10, minutes left: 55)
+12) Lily is starting the process of assembling and decorating the cooled desserts (duration in minutes: 20, minutes left: 35)
+13) Lily is photographing the finished desserts for her portfolio and social media (duration in minutes: 15, minutes left: 20)
+14) Lily is packaging the desserts to bring to the restaurant for a tasting with her colleagues (duration in minutes: 10, minutes left: 10)
+15) Lily is cleaning up her kitchen and reflecting on the day's accomplishments (duration in minutes: 10, minutes left: 0)
+"
+1,"
+Name: Ethan Miller
+Age: 39
+Backstory: Ethan spent his childhood exploring the forests and mountains near his family's cabin. He developed a deep connection with nature and a passion for conservation. Ethan is introspective and contemplative, finding solace in the tranquility of the wilderness.
+Personality: introspective, contemplative, nature-loving
+Location: Ethan lives in a rustic cabin nestled in the woods, with the following areas: {living room, kitchen, bedroom, study, porch, bathroom}.
+Currently: Ethan is a freelance writer working on a book about his experiences in nature. He finds inspiration in the peaceful surroundings of his cabin.
+Daily plan requirement: Ethan plans to spend the entire day writing in his cabin, surrounded by the sights and sounds of nature.
+
+","In 5 min increments, list the subtasks Ethan does when he is writing his book (total duration in minutes 150):
+1) Ethan is brewing a pot of herbal tea to sip while he writes (duration in minutes: 10, minutes left: 140)
+2) Ethan is reviewing his notes and outlining the next chapter of his book (duration in minutes: 20, minutes left: 120)
+3) Ethan is writing the opening paragraph of the new chapter (duration in minutes: 15, minutes left: 105)
+4) Ethan is taking a short break to gaze out the window and admire the scenery (duration in minutes: 5, minutes left: 100)
+5) Ethan is delving into the details of a memorable encounter with wildlife for his book (duration in minutes: 25, minutes left: 75)
+6) Ethan is jotting down ideas for descriptive language to capture the essence of the forest (duration in minutes: 10, minutes left: 65)
+7) Ethan is re-reading and revising the paragraph he just wrote (duration in minutes: 10, minutes left: 55)
+8) Ethan is taking a walk outside to clear his mind and gather his thoughts (duration in minutes: 15, minutes left: 40)
+9) Ethan is returning to his cabin and resuming writing with renewed focus (duration in minutes: 20, minutes left: 20)
+10) Ethan is wrapping up the chapter and making notes for the next one (duration in minutes: 20, minutes left: 0)
+"
+2,"
+Name: Sarah Patel
+Age: 31
+Backstory: Sarah was born into a family of engineers and grew up surrounded by gadgets and gizmos. She inherited her parents' love for tinkering and problem-solving, spending her childhood taking apart and rebuilding all sorts of electronic devices. Sarah is curious and inventive, always looking for new ways to apply technology to improve people's lives.
+Personality: curious, inventive, tech-savvy
+Location: Sarah lives in a modern apartment with the following areas: {living room, kitchen, bedroom, home office, balcony, bathroom}.
+Currently: Sarah is a software engineer working for a tech startup, currently developing a new app to streamline household chores. She enjoys the challenge of coding and finding creative solutions to complex problems.
+Daily plan requirement: Sarah plans to spend the entire day coding and debugging her app without any interruptions.
+
+","In 5 min increments, list the subtasks Sarah does when she is working on her app (total duration in minutes 360):
+1) Sarah is reviewing user feedback and identifying areas for improvement in the app's interface (duration in minutes: 20, minutes left: 340)
+2) Sarah is debugging a section of code that's causing a glitch in the app's functionality (duration in minutes: 30, minutes left: 310)
+3) Sarah is refactoring the code to optimize performance and reduce load times (duration in minutes: 40, minutes left: 270)
+4) Sarah is testing the app on different devices and operating systems to ensure compatibility (duration in minutes: 50, minutes left: 220)
+5) Sarah is implementing new features based on user requests and market trends (duration in minutes: 60, minutes left: 160)
+6) Sarah is documenting her code and writing detailed comments for future reference (duration in minutes: 20, minutes left: 140)
+7) Sarah is taking a short break to stretch and clear her mind (duration in minutes: 10, minutes left: 130)
+8) Sarah is troubleshooting an error message reported by a beta tester (duration in minutes: 30, minutes left: 100)
+9) Sarah is collaborating with her team members via video conference to discuss progress and brainstorm solutions (duration in minutes: 45, minutes left: 55)
+10) Sarah is updating the app's documentation and release notes for the latest version (duration in minutes: 25, minutes left: 30)
+11) Sarah is running final tests and preparing to deploy the updated version of the app (duration in minutes: 30, minutes left: 0)
+"
+3,"
+Name: Michael Chang
+Age: 42
+Backstory: Michael grew up in a bustling city where his parents ran a small restaurant. Surrounded by the sights, sounds, and smells of the kitchen, he developed a deep appreciation for food and cooking. Michael is outgoing and charismatic, with a talent for bringing people together over a shared meal.
+Personality: sociable, passionate, culinary
+Location: Michael lives in a spacious loft apartment with the following areas: {open kitchen, dining area, living room, home office, bedroom, bathroom}.
+Currently: Michael is a chef and restaurateur, currently working on developing a new menu for his restaurant. He enjoys experimenting with flavors and techniques in his home kitchen.
+Daily plan requirement: Michael plans to spend the entire day testing recipes and refining his new menu.
+
+","In 5 min increments, list the subtasks Michael does when he is working on his new menu (total duration in minutes 300):
+1) Michael is reviewing his notes and brainstorming ideas for new dishes (duration in minutes: 15, minutes left: 285)
+2) Michael is prepping ingredients for his first recipe test (duration in minutes: 20, minutes left: 265)
+3) Michael is chopping vegetables and marinating meat for one of his signature dishes (duration in minutes: 30, minutes left: 235)
+4) Michael is preheating the oven and preparing to roast vegetables for a side dish (duration in minutes: 10, minutes left: 225)
+5) Michael is tasting and adjusting the seasoning of a sauce for one of his main courses (duration in minutes: 15, minutes left: 210)
+6) Michael is checking on the progress of the roasting vegetables and adjusting the temperature if necessary (duration in minutes: 10, minutes left: 200)
+7) Michael is plating the dishes and garnishing them with fresh herbs (duration in minutes: 25, minutes left: 175)
+8) Michael is setting the table for a mock tasting with friends to get feedback on the new dishes (duration in minutes: 15, minutes left: 160)
+9) Michael is hosting the tasting and taking notes on everyone's feedback (duration in minutes: 40, minutes left: 120)
+10) Michael is cleaning up the kitchen and putting away ingredients (duration in minutes: 20, minutes left: 100)
+11) Michael is reviewing his notes from the tasting and making adjustments to the recipes (duration in minutes: 25, minutes left: 75)
+12) Michael is updating his menu with the revised dishes and planning the next steps for implementing the changes at his restaurant (duration in minutes: 20, minutes left: 55)
+13) Michael is taking a break to enjoy a cup of coffee and relax before tackling his next task (duration in minutes: 15, minutes left: 40)
+14) Michael is researching new ingredients and techniques online for inspiration (duration in minutes: 30, minutes left: 10)
+15) Michael is jotting down ideas for potential specials and seasonal dishes to add to the menu rotation (duration in minutes: 10, minutes left: 0)
+"
+4,"
+Name: Emily Johnson
+Age: 34
+Backstory: Emily grew up in a small town where her parents owned a bookstore. Surrounded by books from a young age, she developed a love for literature and art. Despite her quiet demeanor, Emily is deeply passionate about her interests and is always seeking new inspiration.
+Personality: introspective, passionate, imaginative
+Location: Emily lives in a cozy attic apartment with the following areas: {living room, bedroom, study, kitchenette, bathroom, storage closet}.
+Currently: Emily is a freelance writer and illustrator, currently working on her first graphic novel. She enjoys the solitude of her attic apartment and finds inspiration in her surroundings.
+Daily plan requirement: Emily plans to spend the entire day working on her graphic novel without any distractions.
+
+","In 5 min increments, list the subtasks Emily does when she is working on her graphic novel (total duration in minutes 240):
+1) Emily is setting up her workspace with her drawing tablet and reference materials (duration in minutes: 10, minutes left: 230)
+2) Emily is sketching character designs for her graphic novel (duration in minutes: 30, minutes left: 200)
+3) Emily is outlining the panels for the first chapter (duration in minutes: 20, minutes left: 180)
+4) Emily is brewing a pot of herbal tea to sip while she works (duration in minutes: 5, minutes left: 175)
+5) Emily is writing dialogue for the characters in her graphic novel (duration in minutes: 40, minutes left: 135)
+6) Emily is taking a short break to flip through an art book for inspiration (duration in minutes: 10, minutes left: 125)
+7) Emily is inking the panels with a fine-tipped pen (duration in minutes: 60, minutes left: 65)
+8) Emily is coloring the illustrations digitally on her drawing tablet (duration in minutes: 50, minutes left: 15)
+9) Emily is proofreading the dialogue and making final edits (duration in minutes: 15, minutes left: 0)
+"
+5,"
+Name: Sam Kissin
+Age: 28
+Backstory: Raised by a single mother who was always working, Sam was often left to her own devices. She learned to fend for herself at an early age and developed a hard edge. She doesn’t let anyone get too close, but she’s fiercely loyal to those she cares about.
+Personality: hard-edged, independent, loyal
+Location: Sam is in double studio that has the following areas: {kitchen, common room, dining, bedroom 2, balcony, piano lounge, bathroom, recreation, hallway}.
+Currently: Sam is a painter who is preparing for her first solo show. She mostly works from home. She is currently living alone in a two bedroom apartment.
+Daily plan requirement: Sam is planning to stay at home all day and never go out of her home.
+
+","In 5 min increments, list the subtasks Sam does when Sam is working on her painting (total duration in minutes 270):
+1) Sam is setting up her easel and canvas (duration in minutes: 15, minutes left: 255)
+2) Sam is sketching out her painting (duration in minutes: 30, minutes left: 225)
+3) Sam is mixing her paint (duration in minutes: 15, minutes left: 210)
+4) Sam is turning on classical music to listen to as she paints (duration in minutes: 5, minutes left: 205)
+5) Sam is painting the background of her painting (duration in minutes: 55, minutes left: 150)
+6) Sam is getting up to stretch (duration in minutes: 10, minutes left: 140)
+7) Sam is painting the foreground of her painting (duration in minutes: 80, minutes left: 60)
+8) Sam is adding the finishing touches to her painting (duration in minutes: 45, minutes left: 15)
+9) Sam is cleaning her brushes (duration in minutes: 15, minutes left: 0)
+"
+6,"
+Name: Kelly Bronson
+Age: 35
+Backstory: Kelly always wanted to be a teacher, and now she teaches kindergarten. During the week, she dedicates herself to her students, but on the weekends, she likes to try out new restaurants and hang out with friends. She is very warm and friendly, and loves caring for others.
+Personality: sweet, gentle, meticulous
+Location: Kelly is in an older condo that has the following areas: {kitchen, bedroom, dining, porch, office, bathroom, living room, hallway}.
+Currently: Kelly is a teacher during the school year. She teaches at the school but works on lesson plans at home. She is currently living alone in a single bedroom condo.
+Daily plan requirement: Kelly is planning to teach during the morning and work from home in the afternoon.
+
+","In 5 min increments, list the subtasks Kelly does when Kelly is working on the next day's kindergarten lesson plan (total duration in minutes: 210):
+1) Kelly is reviewing the kindergarten curriculum standards. (duration in minutes: 15, minutes left: 195)
+2) Kelly is brainstorming ideas for the lesson. (duration in minutes: 30, minutes left: 165)
+3) Kelly is creating the lesson plan. (duration in minutes: 60, minutes left: 105)
+4) Kelly is creating materials for the lesson. (duration in minutes: 30, minutes left: 75)
+5) Kelly is taking a break. (duration in minutes: 15, minutes left: 60)
+6) Kelly is reviewing the lesson plan. (duration in minutes: 30, minutes left: 30)
+7) Kelly is making final changes to the lesson plan. (duration in minutes: 15, minutes left: 15)
+8) Kelly is printing the lesson plan. (duration in minutes: 10, minutes left: 5)
+9) Kelly is putting the lesson plan in her bag. (duration in minutes: 5, minutes left: 0)
+"
+7,"
+Name: Anthony Wang
+Age: 19
+Backstory: A sophomore in college, Anthony is a varsity soccer player majoring in biomedical engineering. He is close with his family, even though they live across the country, and keeps a lively social schedule. He often leaves work to the last minute, but always manages to finish it before the deadline.
+Personality: social, hardworking, busy
+Location: Anthony lives in a single bedroom in a dorm that has the following areas: {single dorm room, communal bathroom, lounge, shared kitchen, hallway, mailroom, dining hall}.
+Currently: Anthony is a student during midterms. He attends his college classes virtually. He is currently living alone in a single dorm room.
+
+","In 5 min increments, list the subtasks Anthony does when Anthony is studying for midterms (total duration in minutes 120):
+1) Anthony is reviewing the lecture notes from the past few weeks. (duration in minutes: 15, minutes left: 105)
+2) Anthony is doing practice problems from the textbook. (duration in minutes: 30, minutes left: 75)
+3) Anthony is checking his answers in the back of the textbook. (duration in minutes: 10, minutes left: 65)
+4) Anthony makes a snack. (duration in minutes: 5, minutes left: 60)
+5) Anthony is making a study guide. (duration in minutes: 15, minutes left: 45)
+6) Anthony is calls a friend to work through problems together. (duration in minutes: 45, minutes left: 0)
+"
+8,"
+Name: Ryan Thompson
+Age: 35
+Backstory: Ryan grew up in a small coastal town where his family ran a fishing business. From a young age, he developed a deep connection with the ocean and a passion for marine life. Ryan is adventurous and free-spirited, always seeking new experiences and challenges.
+Personality: adventurous, compassionate, independent
+Location: Ryan lives in a beachfront cottage with the following areas: {living room, kitchen, bedroom, study, patio, bathroom}.
+Currently: Ryan is a marine biologist conducting research on coral reef ecosystems, currently studying the impact of climate change on coral health. He finds inspiration in the natural beauty of the ocean and is dedicated to protecting marine habitats.
+Daily plan requirement: Ryan plans to spend the entire day diving and collecting data on coral reefs for his research project.
+
+","In 5 min increments, list the subtasks Ryan does when he is conducting his research (total duration in minutes 200):
+1) Ryan is gearing up for his dive and checking his scuba equipment (duration in minutes: 15, minutes left: 185)
+2) Ryan is reviewing his research objectives and surveying the dive site (duration in minutes: 10, minutes left: 175)
+3) Ryan is descending into the water and beginning his underwater observations (duration in minutes: 30, minutes left: 145)
+4) Ryan is documenting coral health and recording data on species diversity (duration in minutes: 40, minutes left: 105)
+5) Ryan is collecting water samples for analysis back in the lab (duration in minutes: 20, minutes left: 85)
+6) Ryan is taking a short break to rest and hydrate underwater (duration in minutes: 5, minutes left: 80)
+7) Ryan is conducting underwater photography to document coral bleaching and other signs of stress (duration in minutes: 25, minutes left: 55)
+8) Ryan is conducting fish counts and observing interactions with coral reef ecosystems (duration in minutes: 30, minutes left: 25)
+9) Ryan is ascending to the surface and returning to shore with his collected data (duration in minutes: 15, minutes left: 10)
+10) Ryan is debriefing with his research team and discussing preliminary findings (duration in minutes: 10, minutes left: 0)
+"
+9,"
+Name: Sofia Ramirez
+Age: 29
+Backstory: Sofia grew up in a rural village surrounded by lush forests and rolling hills. She developed a deep appreciation for nature and a fascination with plants and herbs. Sofia is nurturing and empathetic, always eager to lend a helping hand to those in need.
+Personality: nurturing, empathetic, nature-loving
+Location: Sofia lives in a quaint cottage nestled in the countryside, with the following areas: {living room, kitchen, bedroom, garden, attic, bathroom}.
+Currently: Sofia is an herbalist and apothecary, currently cultivating her own medicinal herb garden. She enjoys the process of growing and harvesting plants for use in her natural remedies.
+Daily plan requirement: Sofia plans to spend the entire day tending to her herb garden and preparing herbal remedies.
+
+","In 5 min increments, list the subtasks Sofia does when she is working in her herb garden (total duration in minutes 180):
+1) Sofia is watering her herb garden and checking for signs of pests or disease (duration in minutes: 15, minutes left: 165)
+2) Sofia is pruning and trimming the herbs to encourage healthy growth (duration in minutes: 20, minutes left: 145)
+3) Sofia is harvesting mature herbs for use in her remedies (duration in minutes: 30, minutes left: 115)
+4) Sofia is replanting seedlings and dividing overcrowded herbs to promote better growth (duration in minutes: 25, minutes left: 90)
+5) Sofia is fertilizing the soil and replenishing nutrients for her herbs (duration in minutes: 15, minutes left: 75)
+6) Sofia is taking a short break to sip herbal tea and enjoy the tranquility of her garden (duration in minutes: 10, minutes left: 65)
+7) Sofia is researching new herbal remedies and making notes for future experimentation (duration in minutes: 20, minutes left: 45)
+8) Sofia is harvesting flowers for drying and use in herbal teas and infusions (duration in minutes: 20, minutes left: 25)
+9) Sofia is gathering herbs for distillation to extract essential oils (duration in minutes: 25, minutes left: 0)"
